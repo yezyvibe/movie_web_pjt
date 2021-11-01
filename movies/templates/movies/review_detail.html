@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+
+
+{% block body%}
+  <div style="height: 120px"></div>
+  <hr>
+  <section class="blog_area single-post-area section-padding bg-white pt-0">
+    <div class="container d-flex justify-content-center">
+       <div class="row w-75">
+          <div class="col-lg-12 posts-list">
+             <div class="single-post">
+                <div class="feature-img">
+                   <img class="img-fluid" src="img/blog/single_blog_1.png" alt="">
+                </div>
+             </div>
+             <div class="blog-author">
+                <div class="media">
+                  <div class="mr-3">
+                    <a href="{% url 'accounts:profile' review.user.username %}">
+                    <img class="mx-auto" src="{{ review.user.image.url }}" alt="">
+                    <h6 class="text-center">{{ review.user.username }}</h6>
+                     </a>  
+                  </div>
+                   <div class="media-body">
+                      <a>
+                         <h3>{{ review.title }}&nbsp;&nbsp;</h3>
+                         <a class="d-inline" href="{% url 'movies:review_update' movie_pk review.pk %}"><i class="fas fa-cog " style="color:gray; font-size: 1em"></i></a>
+                      </a>
+                      <p>{{ review.content }}</p>
+                      <p>{{ review.created_at }}</p>
+                   </div>
+                </div>
+                <div class="navigation-top">
+                  <div class="d-sm-flex justify-content-between text-center">
+                    <p class="like-info"><span class="align-middle"><i class="fa fa-star"></i></span>{{ review.rank }}</p>
+                    <div class="col-sm-2 text-center my-2 my-sm-0">
+                    </div>
+                    <ul class="social-icons">
+                       <li><a href="facebook.com/{{review.user.username}}"><i class="fa fa-facebook-f"></i></a></li>
+                       <li><a href="twitter.com/{{review.user.username}}"><i class="fa fa-twitter"></i></a></li>
+                    </ul>
+                 </div>
+                </div>
+
+             </div>
+             <div class="comment-form">
+                 <div class="row">
+                    <div class="col-12">
+                       <div class="form-group">
+                          <textarea id="userInput" class="form-control w-100" name="comment" cols="20" rows="5"
+                             placeholder="Write Comment"></textarea>
+                       </div>
+                    </div>
+                 </div>
+                 <div class="form-group">
+                    <button id="inputBtn" type="submit" class="button button-contactForm btn_1 boxed-btn">Send Comment</button>
+                 </div>
+            </div>
+             <div class="comments-area" id="commentsArea">
+                <!-- <h4>{{ review.comment_set.all|length}} Comments</h4> -->
+                <!-- 코멘트 반복 -->
+                {% for comment in review.comment_set.all reversed %}
+                <div class="comment-list">
+                   <div class="single-comment justify-content-between d-flex">
+                      <div class="user justify-content-between d-flex">
+                         <div class="thumb">
+                            <img src="{{ comment.user.image.url }}" alt="">
+                         </div>
+                         <div class="desc">
+                            <p class="comment">
+                               {{ comment.content }}
+                            </p>
+                            <div class="d-flex justify-content-between">
+                               <div class="d-flex align-items-center">
+                                  <h5>
+                                     <a href="{% url 'accounts:profile' comment.user.username %}">{{ comment.user.username }}</a>
+                                  </h5>
+                                  <p class="date">{{ comment.created_at }}</p>
+                               </div>
+                               <div class="reply-btn">
+                                <a href="{% url 'movies:comment_delete' movie_pk review.pk comment.pk %}"><i class="fas fa-trash-alt"></i></a>
+                               </div>
+                            </div>
+                         </div>
+                      </div>
+                   </div>
+                </div>
+              {% endfor %}
+             
+          </div>
+       </div>
+    </div>
+ </section>
+  <script>
+    // 코멘트 비동기
+    const userInput = document.querySelector('#userInput')
+    const inputBtn = document.querySelector('#inputBtn')
+    const resultArea2 = document.querySelector('#resultArea2')
+    const commentArea = document.querySelector('#commentsArea')
+    inputBtn.addEventListener('click', function(event) {
+      const inputText = userInput.value
+      axios.get(`comment_create/?inputText=${inputText}`)
+        .then(function (res) { 
+          const comment = res.data.new_comment
+          const commentList = document.createElement('div')
+          commentList.setAttribute('class', 'comment-list')
+
+          const singleComment = document.createElement('div')
+          singleComment.setAttribute('class', 'single-comment justify-content-between d-flex')
+
+          const user = document.createElement('div')
+          user.setAttribute('class', 'user justify-content-between d-flex')
+          
+          const thumb = document.createElement('div')
+          thumb.setAttribute('class', 'thumb')
+          
+          const userImg = document.createElement('img')
+          userImg.setAttribute('src', `${comment.user_img}`)
+          
+          const desc = document.createElement('div')
+          desc.setAttribute('class', 'desc')
+          
+          const commentP = document.createElement('p')
+          commentP.setAttribute('class', 'comment')
+          commentP.innerText = `${comment.content}`
+          
+          const flexDiv1 = document.createElement('div')
+          flexDiv1.setAttribute('class', 'd-flex justify-content-between')
+          
+          const flexDiv2 = document.createElement('div')
+          flexDiv2.setAttribute('class', 'd-flex align-items-center')
+
+          
+          const h5a = document.createElement('h5')
+          const usernameA = document.createElement('a')
+          usernameA.setAttribute('href', `/accounts/${comment.user}`)
+          usernameA.innerText = comment.user
+
+          const dateP = document.createElement('p')
+          dateP.setAttribute('class', 'date')
+          dateP.innerText = comment.created
+          
+          const replyBtn = document.createElement('div')
+          replyBtn.setAttribute('class', 'reply-btn')
+          
+          const deleteA = document.createElement('a')
+          deleteA.setAttribute('href', `${res.data.comment_pk}`)
+          
+          const fontI = document.createElement('i')
+          fontI.setAttribute('class', 'fas fa-trash-alt')
+          
+          commentList.appendChild(singleComment)
+          singleComment.appendChild(user)
+          user.append(thumb, desc)
+          thumb.appendChild(userImg)
+          desc.append(commentP, flexDiv1)
+          flexDiv1.append(flexDiv2, replyBtn)
+          flexDiv2.append(h5a, dateP)
+          h5a.appendChild(usernameA)
+          replyBtn.appendChild(deleteA)
+          deleteA.appendChild(fontI)     
+          userInput.value = ""
+          $(commentArea).prepend(commentList)
+    })
+  })
+  </script>
+{% endblock %}

@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block body %}
+<!doctype html>
+<html class="no-js" lang="ko"> 
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>EventCon</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'img/favicon.png' %}">
+
+</head>
+
+<body>
+    <div class="performar_area black_bg">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="section_title mb-80">
+                        <h3 class="wow fadeInRight" data-wow-duration="1s" data-wow-delay=".3s">Recommendation</h3>
+                        {% if request.user.is_authenticated %}
+                        <p class="wow fadeInRight" data-wow-duration="1s" data-wow-delay=".4s" >{{ request.user.username }}님을 위한 영화를 추천드립니다!</p>
+                        {% else %}
+                        <p class="wow fadeInRight" data-wow-duration="1s" data-wow-delay=".4s" >회원이 되시면 더 많은 영화를 추천 받으실 수 있습니다!</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="row">
+                    {% for movie in movies %}
+                    <div class="col-lg-6 col-md-6">
+                        <a href="{% url 'movies:detail' movie.pk %}">
+                            <div class="single_performer wow fadeInUp" data-wow-duration="1s" data-wow-delay=".3s">
+                                <div data-tilt class="thumb">
+                                    <img src="https://image.tmdb.org/t/p/w780{{ movie.poster_path }}" alt="">
+                                </div>
+                                <div class="performer_heading">
+                                    <h4>{{ movie.title }}</h4>
+                                    <span>{{ movie.release_date|date:"Y" }}</span>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="about_area black_bg">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="section_title text-center mb-80">
+                        
+                        <h3 class="wow fadeInRight" data-wow-duration="1s" data-wow-delay=".3s" >Trending Now</h3>
+                        <p class="wow fadeInRight" data-wow-duration="1s" data-wow-delay=".4s" >최근 인기 급상승 하는 영화를 추천드립니다 !</p>
+                    </div>
+                </div>
+            </div>
+            <div class="row align-items-center">
+                <div class="col-lg-7 col-md-6">
+                    <div class="about_thumb">
+                        <div class="thumb_inner wow fadeInUp" data-wow-duration="1s" data-wow-delay=".3s">
+                            <img src="https://image.tmdb.org/t/p/w500{{ new_one.backdrop_path }}" alt="">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-5 col-md-6">
+                    <div class="about_info pl-68">
+                        <h4 class=" wow fadeInLeft" data-wow-duration="1s" data-wow-delay=".5s">{{ new_one.title }}</h4>
+                        <small style="color: whitesmoke;"class=" wow fadeInLeft" data-wow-duration="1s" data-wow-delay=".6s">{{ new_one.overview }}</small>
+                        <p><a href="{% url 'movies:detail' new_one.pk %}" class="boxed-btn3  wow fadeInLeft" data-wow-duration="1s" data-wow-delay=".7s">더보기</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+{% endblock %}

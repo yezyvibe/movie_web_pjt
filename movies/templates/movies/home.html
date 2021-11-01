@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block body %}
+    <div style="height: 150px;">
+
+    </div>
+    <div class="slider_area mt-5 pt-5">
+
+      <div class="single_slider d-flex align-items-center overlay h-75">
+          <div class="container">
+              <div class="row align-items-center justify-content-center">
+                  <div class="col-xl-12">
+                      <div class="slider_text text-center">
+                        <!-- 메인로고 -->
+                        <img src="{% static 'img/main_logo.png' %}" alt="main_logo" width="550">
+                          <div class="shape_1 wow fadeInUp" data-wow-duration="1s" data-wow-delay=".2s">
+                              <img src="{% static 'img/shape/shape_1.svg' %}" alt="">
+                          </div>
+                          <div class="shape_2 wow fadeInDown" data-wow-duration="1s" data-wow-delay=".2s">
+                              <img src="{% static 'img/shape/shape_2.svg' %}" alt="">
+                          </div>
+                          <div class="row">
+                            <div class="col-12">
+                              <div class="form-group d-flex justify-content-center">
+                                <input id="userInput" class="form-control w-50" name="subject" id="subject" type="text" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Enter Movie'" placeholder="Enter Movie">
+                              </div>
+                            </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+  <div class="row">
+    <div class="col-12 d-flex justify-content-center">
+      <div id="resultArea2" style="width: 36.5%;">
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 코멘트 비동기
+    // input 에 이벤트 걸 준비
+    const userInput = document.querySelector('#userInput')
+    userInput.addEventListener('input', function(event) {
+      // 입력값
+      const inputText = event.target.value
+      console.log('입력값:', inputText)
+      // 결과보여줄 div
+      const resultArea2 = document.querySelector('#resultArea2')
+      axios.get(`search/?inputText=${inputText}`)
+        .then(function (res) { 
+          // 결과 div의 자식 삭제
+          while ( resultArea2.hasChildNodes() ) {
+            resultArea2.removeChild( resultArea2.firstChild )
+          }
+          // ul-li-a 로 결과들 생성
+          const resultDiv = document.createElement('div')
+          resultDiv.setAttribute('class', 'list-group')
+          for( const i in res.data){
+            const titleA = document.createElement('a')
+            titleA.setAttribute('class', 'list-group-item list-group-item-action')
+            titleA.innerText = res.data[i].fields.title
+            titleA.setAttribute('href', `movies/${res.data[i].pk}`)
+            resultDiv.appendChild(titleA)
+          }
+          // 결과 div에 결과들 넣기
+          resultArea2.append(resultDiv)
+          console.log(res.data)
+        })
+        .catch(function(err) {
+          console.log(err)
+        })
+      })
+  </script>
+{% endblock %}

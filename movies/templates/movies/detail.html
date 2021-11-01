@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+
+{% block body%}
+  
+  <div style="height: 150px"></div>
+  <!-- 영화 상세 정보 -->
+  <div class="d-flex justify-content-center">
+    <img class="img-fluid" src="https://image.tmdb.org/t/p/w780{{ movie.backdrop_path }}" style="border-radius:30px 30px" alt="movie.title"/>
+  </div>
+      <footer class="footer">
+        <div class="footer_top">
+          <div class="container">
+            <div class="row justify-content-center">
+              <div class="d-flex-row justify-content-center">
+                <img class="img-fluid" src="https://image.tmdb.org/t/p/w185{{ movie.poster_path }}" alt="movie.title"/>
+                <a href="{% url 'movies:review_create' movie.pk %}" class="genric-btn primary wow fadeInUp d-block" data-wow-duration="1s" data-wow-delay=".6s">리뷰남기기</a>
+                {% if user in movie.like_users.all %}
+                <i class="genric-btn primary wow fadeInUp d-block text-white " data-wow-duration="1s" data-wow-delay=".6s" data-id="{{ movie.id }}">관심없어요</i>
+                {% else %}
+                <i class="genric-btn primary wow fadeInUp d-block text-white" data-wow-duration="1s" data-wow-delay=".6s" data-id="{{ movie.id }}">보고싶어요</i>
+                {% endif %}
+                <p class="card-text"><small class="text-muted"><span id="like-count-{{ movie.id }}">{{ movie.like_users.count }}</span> 명이 좋아합니다.</small></p>        
+              </div>
+                <div class="col-lg-6 col-md-8">
+                  <div class="footer_widget">
+                    <div class="address_details text-center">
+                      <h3 id="movieTitle" class="wow fadeInUp" data-wow-duration="1s" data-wow-delay=".4s">{{ movie.title }}
+                        {% if request.user.is_superuser %}
+                          <a href="{% url 'movies:movie_update' movie.pk %}"><i class="fas fa-cog " style="color:gray; font-size: 0.7em"></i></a>
+                        {% endif %}
+                      </h3>
+                        <h5 class="wow fadeInUp text-danger" data-wow-duration="1s" data-wow-delay=".3s">{{ movie.release_date|date:"Y" }}・{% for genre in genres %}{{ genre.name }} {% endfor %} ★{{ movie.vote_average }}</h5>
+                        <p class="wow fadeInUp" data-wow-duration="1s" data-wow-delay=".5s"><small>{{ movie.overview }}</small></p>
+                        </div>
+                  </div>
+                  </div>
+                </div>
+              </div>
+           </div>
+         </footer>
+  </div>
+  <!-- 예고편 -->
+  <div class="d-none d-sm-block mb-5 pb-4">
+    <div id="map" class="d-flex justify-content-center" style="height: 480px; position: relative; overflow: hidden;"> 
+        <iframe id="preview" class="embed-responsive-item mx-auto" frameborder="0" allowfullscreen width="75%" height="100%"></iframe>
+    </div>
+  </div>
+  <!-- 리뷰 리스트 -->
+  {% if not movie.review_set.all %}
+    <br>
+    <br>
+  {% else %}
+  <section class="blog_area section-padding bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mb-5 mb-lg-0">
+                <div class="blog_left_sidebar">
+                  <!-- 리뷰 데이터 반복 -->
+                  {% for review in movie.review_set.all %}
+                    <article class="blog_item">
+                        <div class="blog_details">
+                            <a class="d-inline-block" href="{% url 'movies:review_detail' movie.pk review.pk %}">
+                                <h2>{{ review.title }}</h2>
+                            </a>
+                            {% if review.spoiler %}
+                              <details>
+                                <summary>스포일러가 있습니다. 더보기</summary>
+                                <p>{{ review.content }}</p>
+                              </details>
+                            {% else %}
+                              <p>{{ review.content }}</p>
+                            {% endif %}
+                            <ul class="blog-info-link">
+                                <li><a href="{% url 'accounts:profile' review.user.username %}"><i class="fa fa-user"></i> {{ review.user.username }}</a></li>
+                                <li><a><i class="fa fa-comments"></i> {{ review.comment_set.all|length }} Comments</a></li>
+                            </ul>
+                        </div>
+                    </article>
+                  {% endfor %}
+
+                </div>
+            </div>
+        </div>
+    </div>
+  </section>
+  {% endif %}
+
+
+
+<script>
+  // 유튜브 예고편
+  const API_KEY = 'AIzaSyAc3mdPbqCFEZYlNjOeGAw_lxey1321-GQ'
+  // const API_KEY = 'AIzaSyBYoVQuyYq7YYG2loQq83pISsFAFr64CU8'
+  const YOUTUBE_URL = 'https://www.googleapis.com/youtube/v3/search'
+  const videos = []
+  const video = []
+  const title = document.getElementById('movieTitle').innerText;
+  const get_preview = function () {
+    const params = {
+      key: API_KEY,
+      part: 'snippet',
+      type: 'video',
+      q: title+' trailer',
+    }
+    axios.get(YOUTUBE_URL, {params})
+      .then((res)=>{
+        this.videos = res.data.items
+        this.video = this.videos[0]
+        const iframeTag = document.querySelector('#preview')
+        const iframeSrc = `https://www.youtube.com/embed/${this.video.id.videoId}`
+        iframeTag.setAttribute('src', iframeSrc)
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+  }
+  get_preview()
+
+  // 좋아요 깔끔하게 
+  const heartBtns = document.querySelectorAll('i')
+  heartBtns.forEach((heartBtn)=>{
+    heartBtn.addEventListener('click', function(event){
+      const movieId = event.target.dataset.id
+      const countSpan = document.querySelector(`#like-count-${movieId}`)
+      axios.get(`/movies/${movieId}/like/`)
+        .then((response)=>{
+            if (response.data.status) {
+              heartBtn.setAttribute = ('class', 'btn btn-primary')
+              heartBtn.innerText = '- 관심없어요'
+              countSpan.innerHTML = response.data.count
+            } else {
+              heartBtn.setAttribute = ('class', 'btn btn-danger')
+              heartBtn.innerText = '+ 보고싶어요'
+              countSpan.innerHTML = response.data.count
+            }
+        })
+    })
+  })
+
+  </script>
+
+
+<footer class="footer">
+  <div class="footer_top">
+      <div class="container">
+          <div class="row justify-content-center">
+              <div class="col-lg-6 col-md-8">
+                  <div class="footer_widget">
+                      <div class="address_details text-center">
+                        <h4 class="wow fadeInUp" data-wow-duration="1s" data-wow-delay=".3s">지금 바로 영화를 감상하세요!</h4>
+                        <p class="wow fadeInUp" data-wow-duration="1s" data-wow-delay=".5s"> <small>아래 버튼을 누르시면 네이버 시리즈on로 연결해드립니다</small></p>
+                        <a href="https://serieson.naver.com/search/search.nhn?t=all&fs=movie&q={{ movie.title }}" target="_blank" class="boxed-btn3 wow fadeInUp" data-wow-duration="1s" data-wow-delay=".6s">영화 보러가기</a>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+</footer>
+<!-- footer_end  -->
+{% endblock %}

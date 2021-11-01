@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load bootstrap4 %}
+
+{% block body %}
+<style>
+  body {
+    background-image: url('/static/img/login_bg.jpg');
+  }
+  h1 {
+    color: white;
+    text-align: center;
+    margin: 10px ;
+  }
+  a {
+    color: blue;
+  }
+</style>
+
+  <div class="container p-0" style="margin-top: 8%;  width: 35%; background-color: black; opacity: 0.88;">
+    <br>
+    {% if request.resolver_match.url_name == 'review_create' %}
+    <h1>리뷰 등록</h1>
+    {% elif request.resolver_match.url_name == 'review_update' %}
+    <h1>리뷰 수정</h1>
+    {% elif request.resolver_match.url_name == 'movie_update' %}
+    <h1>영화 정보 수정</h1>
+    {% else %}
+    <h1>영화 정보 등록</h1>
+    {% endif %}
+
+    <form class="w-75 mx-auto mb-5 pt-5" action="" method="POST" enctype="multipart/form-data">
+      <hr>
+      {% csrf_token %}
+      {% bootstrap_form form %}
+      {% if request.resolver_match.url_name == 'review_create' %}
+      <small id="passwordHelpBlock" class="form-text text-muted" style="text-align: center;" >
+        <span> ✔스포일러가 포함되어 있다면 위 버튼을 체크해주세요 </span>
+      </small>
+      {% endif %}
+      <br>
+      {% if request.resolver_match.url_name == 'review_create' %}
+      <button class="btn btn-outline-dark w-100">작성 완료</button>
+      <hr>
+      {% elif request.resolver_match.url_name == 'movie_update' %}
+      <button class="btn btn-outline-dark w-100">등록하기</button>
+      <button class="btn btn-outline-dark w-100"><a href="{% url 'movies:movie_delete' movie.pk %}" style="color: rgb(245, 49, 49);">삭제하기</a></button>
+      {% elif request.resolver_match.url_name == 'review_update' %}
+      <button class="btn btn-outline-dark w-100">등록하기</button>
+      <button class="btn btn-outline-dark w-100"><a href="{% url 'movies:review_delete' movie_pk review_pk %}" style="color: rgb(245, 49, 49);">삭제하기</a></button>
+      {% elif request.resolver_match.url_name == 'movie_create' %}
+      <button class="btn btn-outline-dark w-100">등록하기</button>
+
+      {% endif %}
+    </form>
+    <br>
+  </div>
+{% endblock %}

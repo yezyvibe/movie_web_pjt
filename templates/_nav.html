@@ -1,0 +1,66 @@
+{% load static %}
+
+
+<!-- header-start -->
+<header>
+  <div class="header-area" style="background-color: black;">
+      <div id="sticky-header" class="main-header-area">
+          <div class="container">
+              <div class="header_bottom_border">
+                  <div class="row align-items-center">
+                      <div class="col-xl-3 col-lg-3">
+                          <div class="logo">
+                              <a href="/">
+                                  <img src="{% static 'img/home_logo.png' %}" width="180" height="120" alt="">
+                              </a>
+                          </div>
+                      </div>
+                      <div class="col-xl-6 col-lg-6">
+                          <div class="main-menu  d-none d-lg-block">
+                              <nav>
+                                  <ul id="navigation">
+                                      <li><a href="/">Home</a></li>
+                                      <li><a href="{% url 'movies:index' %}">Movie</a></li>
+
+                                      <li><a href="#">Account<i class="ti-angle-down"></i></a>
+                                          <ul class="submenu">
+                                            {% if request.user.is_authenticated %}
+                                              <li><a href="{% url 'accounts:profile' user.username %}">My page</a></li>
+                                              <li><a href="{% url 'accounts:logout' %}">Logout</a></li>
+                                            {% endif %}
+                                          </ul>
+                                      </li>
+                                      {% if request.user.is_superuser %}
+                                        <li class="nav-item active">
+                                          <form action="{% url 'movies:movie_create' %}" method='POST'>
+                                            {% csrf_token %}
+                                          <a class="nav-link" href="{% url 'movies:movie_create' %}">Add Movie<span class="sr-only">(current)</span></a>
+                                          </form>
+                                        </li>
+                                      {% endif %}
+                                  </ul>
+                              </nav>
+                          </div>
+                      </div>
+
+                      {% if request.user.is_anonymous %}
+                        <div class="col-xl-3 col-lg-3 d-none d-lg-block">
+                          <div class="buy_tkt">
+                              <div class="book_btn d-none d-lg-block">
+                                  <a href="{% url 'accounts:login' %}">로그인</a>
+                              </div>
+                          </div>
+                        </div>
+                      {% endif %}
+
+                      <div class="col-12">
+                          <div class="mobile_menu d-block d-lg-none"></div>
+                      </div>
+                  </div>
+              </div>
+
+          </div>
+      </div>
+  </div>
+</header>
+<!-- header-end -->
